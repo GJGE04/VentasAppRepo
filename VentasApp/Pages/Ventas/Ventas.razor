@@ -1,0 +1,80 @@
+﻿@page "/ventas"
+@inject VentaService VentaService
+@using VentasApp.Core.Entities
+@inject NavigationManager NavigationManager
+@using VentasApp.Application.Services;
+
+<h3 class="ms-3 titulo-categorias">Ventas</h3>
+<h3 class="ms-3" style="font-family: 'Roboto', sans-serif; font-size: 2rem; font-weight: bold; color: #007bff;">Lista de Ventas</h3>
+
+
+@if (ventas == null)
+{
+    <div class="alert alert-info">Cargando ventas...</div>
+}
+else if (!ventas.Any())
+{
+    <div class="alert alert-warning">No hay categorías disponibles.</div>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="CrearVenta">Añadir Venta</button>
+
+    <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var venta in ventas)
+                {
+                    <tr>
+                        <td>@venta.FechaVenta</td>
+                        <td>@venta.Total</td>
+                        <td>
+                            <div class="d-flex justify-content-between">
+                                <a href="/editar-categoria/@venta.Id" class="btn btn-warning btn-sm me-2 w-50">Editar</a>
+                                <button class="btn btn-danger btn-sm w-50" @onclick="() => EliminarVenta(venta.Id)">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+    </table>
+
+}
+
+<NavLink class="nav-link" href="/categorias">Categorías</NavLink>
+<NavLink class="nav-link" href="/productos">Productos</NavLink>
+<NavLink class="nav-link" href="/ventas">Ventas</NavLink>
+
+
+@code {
+    private List<Venta> ventas = new List<Venta>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ventas = await VentaService.GetVentas();
+    }
+
+    private async Task CrearVenta()
+    {
+        // Navegar a la página de crear venta
+        NavigationManager.NavigateTo("/crear-venta");
+    }
+
+    private async Task EditarVenta(int id)
+    {
+        // Navegar a la página de editar venta
+        NavigationManager.NavigateTo($"/editar-venta/{id}");
+    }
+
+    private async Task EliminarVenta(int id)
+    {
+        await VentaService.DeleteVenta(id);
+        ventas = await VentaService.GetVentas();
+    }
+}

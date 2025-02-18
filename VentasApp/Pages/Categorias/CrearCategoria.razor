@@ -1,0 +1,62 @@
+﻿@page "/crear-categoria"
+@using VentasApp.Application.Services;
+@using VentasApp.Core.Entities;
+@*@using Microsoft.AspNetCore.Components.Forms*@
+@inject CategoriaService CategoriaService
+@inject NavigationManager NavigationManager
+
+<h3>Crear Categoría</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+<div class="container mt-4">
+    <EditForm Model="categoria" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre de la Categoría</label>
+                    <InputText id="nombre" @bind-Value="categoria.Nombre" class="form-control" placeholder="Ingrese el nombre de la categoría" />
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success me-2">Crear Categoría</button>
+                    <a href="/categorias" class="btn btn-secondary ms-2">Cancelar</a>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private Categoria categoria = new Categoria();
+    private string errorMessage = null;
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(categoria.Nombre))
+            {
+                errorMessage = "El nombre de la categoría no puede estar vacío.";
+                return;
+            }
+
+            // Guardar la categoría en la base de datos
+            await CategoriaService.AddCategoria(categoria);
+            // Redirigir al listado de categorías
+            NavigationManager.NavigateTo("/categorias");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Hubo un problema al crear la categoría: {ex.Message}";
+        }       
+    }
+}

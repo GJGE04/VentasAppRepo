@@ -1,0 +1,162 @@
+﻿@page "/productoformulario"
+@using VentasApp.Application.Services;
+@inject ProductoService ProductoService
+@inject VentaService VentaService
+@using VentasApp.Core.Entities;
+@inject CategoriaService CategoriaService
+
+<h3 class="page-title">Productos</h3>
+
+<div class="form-container">
+    <h4>@(productoEditando == null ? "Agregar Producto" : "Editar Producto")</h4>
+
+    <div class="form-group">
+        <label for="productoNombre">Nombre</label>
+        <input id="productoNombre" type="text" class="form-control" @bind="productoNombre" placeholder="Nombre del producto" />
+    </div>
+    
+    <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <input id="descripcion" type="text" class="form-control" @bind="descripcion" placeholder="Descripción del producto" />
+    </div>
+
+    <div class="form-group">
+        <label for="productoPrecio">Precio</label>
+        <input id="productoPrecio" type="number" class="form-control" @bind="productoPrecio" placeholder="Precio" />
+    </div>
+
+    <div class="form-group">
+        <label for="productoStock">Stock</label>
+        <input id="productoStock" type="number" class="form-control" @bind="productoStock" placeholder="Stock disponible" />
+    </div>
+
+    <div class="form-group">
+        <label for="productoCategoria">Categoría</label>
+        <select id="productoCategoria" class="form-control" @bind="categoriaSeleccionada">
+            @foreach (var categoria in categorias)
+            {
+                <option value="@categoria.Id">@categoria.Nombre</option>
+            }
+        </select>
+    </div>
+
+    @if (productoEditando == null)
+    {
+        <button class="btn btn-primary" @onclick="CrearProducto">Crear Producto</button>
+    }
+    else
+    {
+        <button class="btn btn-warning" @onclick="ActualizarProducto">Actualizar Producto</button>
+        <button class="btn btn-secondary" @onclick="LimpiarFormulario">Cancelar</button>
+    }
+</div>
+
+<h3 class="page-title">Lista de Productos</h3>
+
+<ul class="product-list">
+    @foreach (var producto in productos)
+    {
+        <li class="product-item">
+            <div class="product-info">
+                <span>@producto.Nombre - @producto.Descripcion - @producto.Precio - @producto.Stock</span>
+            </div>
+            <div class="product-actions">
+                <button class="btn btn-info btn-sm" @onclick="() => EditarProducto(producto)">Editar</button>
+                <button class="btn btn-danger btn-sm" @onclick="() => EliminarProducto(producto.Id)">Eliminar</button>
+            </div>
+        </li>
+    }
+</ul>
+
+@*<div class="pagination">
+    <button @onclick="() => CambiarPagina(-1)" disabled="@(!PuedeIrAtras)">Anterior</button>
+    <span>Página @paginaActual de @totalPaginas</span>
+    <button @onclick="() => CambiarPagina(1)" disabled="@(!PuedeIrAdelante)">Siguiente</button>
+</div>*@
+
+@code {
+    private string productoNombre;
+    private string descripcion;
+    private decimal productoPrecio;
+    private int productoStock;
+    private List<Producto> productos = new List<Producto>();
+    private Producto productoEditando;
+    private List<Producto> productosPaginated = new List<Producto>();
+    private List<Categoria> categorias = new List<Categoria>();
+    private int categoriaSeleccionada; // Variable para almacenar la categoría seleccionada
+
+
+    //private int paginaActual = 1;
+    //private int productosPorPagina = 5;
+    //private int totalPaginas => (int)Math.Ceiling((double)productos.Count / productosPorPagina);
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await ProductoService.ObtenerProductosAsync();
+        //ActualizarProductosPaginate();
+
+        // Cargar las categorías desde la base de datos
+        categorias = await CategoriaService.GetCategorias();
+    }
+
+    //private void ActualizarProductosPaginate()
+    //{
+    //    productosPaginated = productos.Skip((paginaActual - 1) * productosPorPagina).Take(productosPorPagina).ToList();
+    //}
+
+    //private void CambiarPagina(int delta)
+    //{
+    //    paginaActual += delta;
+    //    if (paginaActual < 1) paginaActual = 1;
+    //    if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+    //    ActualizarProductosPaginate();
+    //}
+
+    private async Task CrearProducto()
+    {
+        await ProductoService.CrearProductoAsync(productoNombre, descripcion, productoPrecio, productoStock, categoriaSeleccionada);
+        productos = await ProductoService.ObtenerProductosAsync(); // Refrescar lista de productos
+        // ActualizarProductosPaginate(); // Actualizar paginación después de crear un nuevo producto
+    }
+
+    //private bool PuedeIrAtras => paginaActual > 1;
+    //private bool PuedeIrAdelante => paginaActual < totalPaginas;
+
+    // Editar Producto (cargar datos en el formulario)
+    private void EditarProducto(Producto producto)
+    {
+        productoEditando = producto;
+        productoNombre = producto.Nombre;
+        descripcion = producto.Descripcion;
+        productoPrecio = producto.Precio;
+        productoStock = producto.Stock;
+    }
+
+    // Actualizar Producto
+    private async Task ActualizarProducto()
+    {
+        if (productoEditando != null)
+        {
+            await ProductoService.ActualizarProductoAsync(productoEditando.Id, productoNombre, descripcion, productoPrecio, productoStock, categoriaSeleccionada);
+            productos = await ProductoService.ObtenerProductosAsync(); // Refrescar lista de productos
+            LimpiarFormulario(); // Limpiar el formulario después de actualizar
+        }
+    }
+
+    // Eliminar Producto
+    private async Task EliminarProducto(int productoId)
+    {
+        await ProductoService.EliminarProductoAsync(productoId);
+        productos = await ProductoService.ObtenerProductosAsync(); // Refrescar lista de productos
+    }
+
+    // Limpiar el formulario
+    private void LimpiarFormulario()
+    {
+        productoNombre = string.Empty;
+        descripcion = string.Empty;
+        productoPrecio = 0;
+        productoStock = 0;
+        productoEditando = null;
+    }
+}

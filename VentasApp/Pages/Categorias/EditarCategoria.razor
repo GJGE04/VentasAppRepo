@@ -1,0 +1,118 @@
+﻿@page "/editar-categoria/{Id:int}"   
+@using VentasApp.Core.Entities;
+@using VentasApp.Application.Services;
+@inject CategoriaService CategoriaService
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Forms
+@*@inject IToastService ToastService*@
+
+<h3>Editar Categoría</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+<div class="container mt-4">                            @*agregar un contenedor con un margen superior. Esto asegura que el contenido esté centrado y tenga un espacio adecuado alrededor.*@
+    <EditForm Model="categoria" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />                    @*Se usa DataAnnotationsValidator para aplicar validaciones basadas en las anotaciones del modelo.*@
+        <ValidationSummary />                           @*ValidationSummary para mostrar todos los errores de validación (si los hay) de manera agregada.*@
+
+        <div class="row">                               @*la clase row para definir una fila dentro del contenedor*@
+            <div class="col-md-6 offset-md-3">          @*que el formulario ocupe la mitad del ancho de la pantalla (col-md-6), y la clase offset-md-3 para centrarlo horizontalmente (desplaza el formulario hacia el centro).*@
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre de la Categoría</label>
+                    <InputText id="nombre" @bind-Value="categoria.Nombre" class="form-control" placeholder="Ingrese el nombre de la categoría" />
+                </div>
+
+                <div class="d-flex justify-content-between">            @*Los botones de "Guardar" y "Cancelar" se colocan en una fila flexible (d-flex justify-content-between), asegurando que se alineen correctamente y con suficiente espacio entre ellos.*@
+                    <button type="submit" class="btn btn-primary me-2">Guardar Cambios</button>         @*me-2: Agrega un margen de 0.5rem a la derecha del botón de "Guardar Cambios".*@
+                    <a href="/categorias" class="btn btn-secondary ms-2">Cancelar</a>                   @*ms-2: Agrega un margen de 0.5rem a la izquierda del botón de "Cancelar".*@
+                </div>
+            </div>          @*Como el formulario ahora está limitado a un ancho razonable (col-md-6), los controles dentro de este formulario ya no se estiran a través de toda la pantalla.*@
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }     // Asegúrate de que el Id esté recibiendo el valor correctamente. // Debería ser 'int' aquí, no 'string'
+    private Categoria categoria = new Categoria();
+    private string errorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Verifica que el ID esté llegando correctamente
+            if (Id == 0)
+            {
+                errorMessage = "ID inválido para la categoría.";
+                return;
+            }
+
+            // Obtener la categoría desde la base de datos por el ID
+            categoria = await CategoriaService.GetCategoriaById(Id);
+            if (categoria == null)
+            {
+                errorMessage = "Categoría no encontrada.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Hubo un problema al cargar la categoría: {ex.Message}";
+        }      
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Validar que el nombre de la categoría no esté vacío
+            if (string.IsNullOrWhiteSpace(categoria.Nombre))
+            {
+                errorMessage = "El nombre de la categoría no puede estar vacío.";
+                return;
+            }
+
+            // Actualizar la categoría en la base de datos
+            await CategoriaService.UpdateCategoria(categoria);
+            // Redirigir al listado de categorías
+            NavigationManager.NavigateTo("/categorias");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Hubo un problema al guardar la categoría: {ex.Message}";
+        }     
+    }
+
+    private async Task HandleValidSubmit2()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(categoria.Nombre))
+            {
+                errorMessage = "El nombre de la categoría no puede estar vacío.";
+                //ToastService.ShowError("El nombre de la categoría no puede estar vacío.");
+                return;
+            }
+
+            await CategoriaService.UpdateCategoria(categoria);
+            //ToastService.ShowSuccess("Categoría actualizada correctamente.");
+            NavigationManager.NavigateTo("/categorias");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Hubo un problema al guardar la categoría: {ex.Message}";
+            //ToastService.ShowError($"Error al guardar la categoría: {ex.Message}");
+        }
+    }
+
+    // Si prefieres mostrar un mensaje emergente(por ejemplo, un "toast") en lugar de un mensaje en la parte superior de la página, 
+    // puedes considerar usar una librería como Blazored.Toast para hacer esto.
+    // Instalar Blazored.Toast:                             dotnet add package Blazored.Toast
+    // Luego, en tu archivo _Imports.razor, agrega:         @using Blazored.Toast.Services
+    //                                                      @inject IToastService ToastService
+
+}

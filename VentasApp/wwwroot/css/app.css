@@ -1,0 +1,155 @@
+﻿/* Estilos para la página */
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Estilo del contenedor del formulario */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para cada campo de entrada */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Estilos del botón */
+button.btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+    button.btn:hover {
+        background-color: #0056b3;
+    }
+
+.product-item:hover {
+    background-color: #e9ecef; /* Cambiar el color de fondo al pasar el mouse */
+    transform: scale(1.02); /* Aumentar ligeramente el tamaño del item */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Agregar sombra */
+}
+
+/* Contenedor de la lista de productos con scroll */
+.product-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px auto;
+    max-width: 800px;
+    max-height: 400px; /* Altura máxima del contenedor */
+    overflow-y: auto; /* Habilitar desplazamiento vertical si es necesario */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Efecto de hover en la grilla de productos */
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    font-size: 14px;
+    height: 50px;
+    transition: background-color 0.3s, transform 0.3s; /* Transición para el cambio de color y movimiento */
+    background-color: #f8f9fa;
+}
+
+.product-info {
+    flex-grow: 1; /* Permite que la información ocupe el espacio disponible */
+    text-align: left; /* Alinear el texto a la izquierda */
+}
+
+.product-actions {
+    display: flex;
+    gap: 8px; /* Espacio entre los botones */
+}
+
+    .product-actions button {
+        width: auto; /* Evitar que los botones ocupen todo el ancho */
+        padding: 5px 8px; /* Reducir el tamaño de los botones */
+        font-size: 12px; /* Reducir el tamaño de la fuente de los botones */
+        transition: background-color 0.3s, transform 0.3s; /* Transición suave para el color y el movimiento */
+    }
+
+        .product-actions button:hover {
+            opacity: 0.8; /* Efecto visual para cuando el usuario pasa el mouse sobre los botones */
+
+            background-color: #0056b3; /* Cambio de color al pasar el mouse */
+            transform: scale(1.1); /* Aumentar ligeramente el tamaño del botón */
+            cursor: pointer; /* Cambiar el cursor para indicar que es interactivo */
+        }
+
+/* Estilo del contenedor del formulario */
+.form-container {
+    max-width: 600px;
+    margin: 20px auto; /* Centrar el formulario */
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Otros estilos para los campos de entrada y botones */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button.btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+    button.btn:hover {
+        background-color: #0056b3;
+    }
+

@@ -1,0 +1,133 @@
+﻿@page "/ventasformulario"
+@using VentasApp.Application.Services
+@using VentasApp.Core.Entities
+@inject ProductoService ProductoService
+@inject VentaService VentaService
+
+<h3>Registrar Venta</h3>
+
+<div>
+    <h4>Detalles de la venta</h4>
+
+    <!-- Selección del Producto -->
+    <label>Producto</label>
+    <select @bind="productoSeleccionado" >
+        <option value="0">Seleccione un producto</option>
+        @foreach (var producto in productos)
+        {
+            <option value="@producto.Id">@producto.Nombre</option>
+        }
+    </select>
+
+    <!-- Ingreso de Cantidad -->
+    <label>Cantidad</label>
+    <input type="number" @bind="cantidad" min="1" />
+
+    <!-- Mostrar Precio Unitario cuando se selecciona el Producto -->
+    <label>Precio Unitario</label>
+    <input type="number" value="@precioUnitario" readonly />
+
+    <!-- Mostrar Monto Total -->
+    <label>Monto Total</label>
+    <input type="number" value="@montoTotal" readonly />
+
+    <!-- Agregar Detalle de Venta -->
+    <button @onclick="AgregarVentaDetalle">Agregar Detalle</button>
+</div>
+
+<div>
+    <h4>Lista de Detalles</h4>
+    <ul>
+        @foreach (var detalle in ventaDetalles)
+        {
+            <li>@detalle.Producto.Nombre - Cantidad: @detalle.Cantidad - Precio: @detalle.PrecioUnitario - Monto Total: @detalle.MontoTotal</li>
+        }
+    </ul>
+</div>
+
+<button @onclick="CrearVenta">Crear Venta</button>
+
+@code {
+    private int productoSeleccionado = 0; // Id del producto seleccionado
+    private decimal precioUnitario = 0;   // Precio unitario del producto
+    private decimal montoTotal = 0;       // Monto total calculado
+    private int cantidad = 1;             // Cantidad seleccionada
+    private List<Producto> productos = new List<Producto>();
+    private List<VentaDetalle> ventaDetalles = new List<VentaDetalle>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar los productos al inicio
+        productos = await ProductoService.ObtenerProductosAsync();
+    }
+
+    // Este método se ejecuta cuando el usuario cambia el producto seleccionado
+    private void ProductoSeleccionadoChanged()
+    {
+        var producto = productos.FirstOrDefault(p => p.Id == productoSeleccionado);
+
+        if (producto != null)
+        {
+            precioUnitario = producto.Precio;  // Actualiza el Precio Unitario
+            ActualizarMontoTotal();            // Actualiza el Monto Total automáticamente al seleccionar un producto
+        }
+    }
+
+    // Este método recalcula el monto total al cambiar la cantidad
+    private void ActualizarMontoTotal()
+    {
+        montoTotal = 500; //precioUnitario * cantidad; // Recalcular el monto total con el precio unitario y cantidad
+    }
+
+    // Este método agrega un detalle a la lista de ventaDetalles
+    private void AgregarVentaDetalle()
+    {
+        if (productoSeleccionado > 0 && cantidad > 0)
+        {
+            var producto = productos.FirstOrDefault(p => p.Id == productoSeleccionado);
+            if (producto != null)
+            {
+                var ventaDetalle = new VentaDetalle
+                {
+                    ProductoId = productoSeleccionado,
+                    Producto = producto,
+                    Cantidad = cantidad,
+                    PrecioUnitario = producto.Precio,
+                        //MontoTotal = producto.t
+                };
+
+                ventaDetalles.Add(ventaDetalle);
+                LimpiarCampos(); // Limpiar los campos después de agregar un detalle
+            }
+        }
+    }
+
+    // Limpiar los campos después de agregar un detalle
+    private void LimpiarCampos()
+    {
+        productoSeleccionado = 0;
+        cantidad = 1; // Restablecer la cantidad a 1 por defecto
+        precioUnitario = 0;
+        montoTotal = 0;
+    }
+
+    // Crear la venta con todos los detalles
+    private async Task CrearVenta()
+    {
+        if (ventaDetalles.Count > 0)
+        {
+            var venta = new Venta
+            {
+                FechaVenta = DateTime.Now,
+                ////VentaDetalles = ventaDetalles,
+                Total = ventaDetalles.Sum(d => d.MontoTotal) // Sumar los montos de todos los detalles
+            };
+
+            // Aquí iría tu lógica para crear la venta en el backend
+           // await VentaService.CrearVentaAsync(venta);
+
+            // Limpiar la lista de ventaDetalles después de crear la venta
+            ventaDetalles.Clear();
+        }
+    }
+}

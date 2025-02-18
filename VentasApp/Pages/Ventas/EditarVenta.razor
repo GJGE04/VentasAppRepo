@@ -1,0 +1,66 @@
+﻿@page "/editar-venta/{id}"
+@inject VentaService VentaService
+@inject ProductoService ProductoService
+@using VentasApp.Application.Services;
+@using VentasApp.Core.Entities
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3>Editar Venta</h3>
+
+<EditForm Model="venta" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="productos">Seleccionar Productos</label>
+        <InputSelect id="productos" @bind-Value="productoSeleccionado">
+            <option value="">Seleccione un Producto</option>
+            @foreach (var producto in productos)
+            {
+                <option value="@producto.Id">@producto.Nombre</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label for="cantidad">Cantidad</label>
+        <InputNumber id="cantidad" @bind-Value="cantidad" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Actualizar Venta</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Venta venta = new Venta();
+    private List<Producto> productos = new List<Producto>();
+    private int productoSeleccionado;
+    private int cantidad;
+
+    protected override async Task OnInitializedAsync()
+    {
+        venta = await VentaService.GetVentaById(Id);
+        productos = await ProductoService.ObtenerProductosAsync();      // GetProductos
+    }
+
+    private void HandleValidSubmit()
+    {
+        var producto = productos.FirstOrDefault(p => p.Id == productoSeleccionado);
+        if (producto != null)
+        {
+            venta.VentaProductos.Add(new VentaProducto
+                {
+                    Producto = producto,
+                    ProductoId = producto.Id,
+                    Cantidad = cantidad,
+                    Precio = producto.Precio
+                });
+            venta.Total = venta.VentaProductos.Sum(vp => vp.Cantidad * vp.Precio);
+
+            // Actualizar la venta
+            VentaService.UpdateVenta(venta);
+        }
+    }
+}

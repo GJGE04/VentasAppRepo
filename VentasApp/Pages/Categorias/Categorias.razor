@@ -1,0 +1,80 @@
+﻿@page "/categorias"
+@using VentasApp.Core.Entities;
+@using VentasApp.Application.Services;
+@inject CategoriaService CategoriaService
+@inject NavigationManager NavigationManager
+
+
+<h3 class="ms-3" style="font-family: 'Roboto', sans-serif;">Categorías</h3>    <!-- Mueve el título un poco a la derecha -->
+
+@if (categorias == null)
+{
+    <div class="alert alert-info">Cargando categorías...</div>
+}
+else if (!categorias.Any())
+{
+    <div class="alert alert-warning">No hay categorías disponibles.</div>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="CrearCategoria">Añadir Categoría</button>
+
+    <div class="row mt-4">
+        @foreach (var categoria in categorias)
+        {
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@categoria.Nombre</h5>
+                        <!-- Botones alineados correctamente con d-flex -->
+                        <div class="d-flex justify-content-between">
+                            <a href="/editar-categoria/@categoria.Id" class="btn btn-warning btn-sm w-50 me-2">Editar</a>
+                            <button class="btn btn-danger btn-sm w-50" @onclick="() => EliminarCategoria(categoria.Id)">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="mt-4">
+    <a href="/crear-categoria" class="btn btn-primary">Crear Nueva Categoría</a>
+</div>
+
+<div class="d-flex justify-content-between col-md-4">
+    <NavLink class="nav-link w-50" href="/categorias">Categorías</NavLink>
+    <NavLink class="nav-link w-50" href="/productos">Productos</NavLink>
+    <NavLink class="nav-link w-50" href="/ventas">Ventas</NavLink>
+</div>
+
+
+@code {
+    private List<Categoria> categorias = new List<Categoria>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar las categorías desde el servicio
+        categorias = await CategoriaService.GetCategorias();
+    }
+
+    private void CrearCategoria()
+    {
+        // Redirigir al formulario de creación de una nueva categoría
+        NavigationManager.NavigateTo("/crear-categoria");
+    }
+
+    private async Task EditarCategoria(int id)
+    {
+        // Redirigir al formulario de edición de una categoría
+        NavigationManager.NavigateTo($"/editar-categoria/{id}");
+    }
+
+    private async Task EliminarCategoria(int id)
+    {
+        // Eliminar la categoría
+        await CategoriaService.DeleteCategoria(id);
+        // Actualizar la lista después de eliminar
+        categorias = await CategoriaService.GetCategorias();
+    }
+}

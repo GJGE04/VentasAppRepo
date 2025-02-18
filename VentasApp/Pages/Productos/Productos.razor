@@ -1,0 +1,93 @@
+﻿@page "/productos"
+@using VentasApp.Core.Entities;
+@using VentasApp.Application.Services;
+@inject ProductoService ProductoService
+@inject NavigationManager NavigationManager
+
+<h3 class="ms-3 font-weight-bold">Productos</h3>
+
+<div class="row">
+    <div class="col-auto">
+        <button class="btn btn-primary" @onclick="CrearProducto">Añadir Producto</button>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary" @onclick="CrearProducto_Formulario">Formulario Producto</button>
+    </div>
+</div>
+
+
+<table class="table table-striped mt-4">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Categoria</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var producto in productos)
+        {
+            <tr>
+                <td>@producto.Nombre</td>
+                <td>@producto.Descripcion</td>
+                <td>@producto.Categoria?.Nombre</td>
+                <td>@producto.Precio</td>
+                <td>@producto.Stock</td>
+                <td>
+                    <div class="product-actions">
+                        <button class="btn btn-warning btn-sm w-50 me-2" @onclick="() => EditarProducto(producto.Id)">Editar</button>
+                        <button class="btn btn-danger btn-sm w-50" @onclick="() => EliminarProducto(producto.Id)">Eliminar</button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex">
+    <button class="btn btn-primary me-2" @onclick="CrearProducto">Añadir Producto</button>
+    <button class="btn btn-primary" @onclick="CrearProducto_Formulario">Formulario Producto</button>
+</div>
+
+<NavLink class="nav-link" href="/categorias">Categorías</NavLink>
+<NavLink class="nav-link" href="/productos">Productos</NavLink>
+<NavLink class="nav-link" href="/ventas">Ventas</NavLink>
+
+@code {
+    private List<Producto> productos = new List<Producto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar los productos desde la base de datos
+        productos = await ProductoService.ObtenerProductosAsync();
+    }
+
+    private async Task CrearProducto()
+    {
+        // Redirigir a la página de creación de producto
+        NavigationManager.NavigateTo("/crear-producto");
+    }
+
+    private async Task CrearProducto_Formulario()
+    {
+        // Redirigir a la página de creación de producto
+        NavigationManager.NavigateTo("/productoformulario");
+    }
+
+    private async Task EditarProducto(int id)
+    {
+        // Redirigir a la página de edición de producto
+        NavigationManager.NavigateTo($"/editar-producto/{id}");
+    }
+
+    private async Task EliminarProducto(int id)
+    {
+        // Eliminar el producto
+        await ProductoService.EliminarProductoAsync(id);
+        // Actualizar la lista de productos
+        productos = await ProductoService.ObtenerProductosAsync();
+    }
+}

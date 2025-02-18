@@ -1,0 +1,86 @@
+﻿@page "/editar-producto/{id:int}"
+@using VentasApp.Core.Entities;
+@using VentasApp.Application.Services;
+@inject ProductoService ProductoService
+@inject CategoriaService CategoriaService
+@inject NavigationManager NavigationManager
+
+<h3 class="page-title">Editar Producto</h3>
+
+<div class="form-container">
+    <h4>Editar Producto</h4>
+
+    <div class="form-group">
+        <label for="productoNombre">Nombre</label>
+        <input id="productoNombre" type="text" class="form-control" @bind="producto.Nombre" placeholder="Nombre del producto" />
+    </div>
+
+    <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <input id="descripcion" type="text" class="form-control" @bind="producto.Descripcion" placeholder="Descripción del producto" />
+    </div>
+
+    <div class="form-group">
+        <label for="productoPrecio">Precio</label>
+        <input id="productoPrecio" type="number" class="form-control" @bind="producto.Precio" placeholder="Precio" />
+    </div>
+
+    <div class="form-group">
+        <label for="productoStock">Stock</label>
+        <input id="productoStock" type="number" class="form-control" @bind="producto.Stock" placeholder="Stock disponible" />
+    </div>
+
+    <div class="form-group">
+        <label for="categoriaId">Categoría</label>
+        <select id="categoriaId" class="form-control" @bind="producto.CategoriaId">
+            <option value="">Seleccione una categoría</option>
+            @foreach (var categoria in categorias)
+            {
+                <option value="@categoria.Id">@categoria.Nombre</option>
+            }
+        </select>
+    </div>
+
+    <button class="btn btn-primary" @onclick="ActualizarProducto">Actualizar Producto</button>
+    <button class="btn btn-secondary" @onclick="CancelarEdicion">Cancelar</button>
+</div>
+
+@code {
+    [Parameter] public int id { get; set; }
+    private Producto producto = new Producto();
+    private List<Categoria> categorias = new List<Categoria>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar el producto a editar desde el servicio
+        producto = await ProductoService.GetProductoById(id);
+
+        // Cargar las categorías desde la base de datos
+        categorias = await CategoriaService.GetCategorias();
+    }
+
+    // Método para actualizar el producto
+    private async Task ActualizarProducto()
+    {
+        if (producto != null)
+        {
+            await ProductoService.ActualizarProductoAsync(
+                producto.Id,
+                producto.Nombre,
+                producto.Descripcion,
+                producto.Precio,
+                producto.Stock,
+                producto.CategoriaId
+            );
+
+            // Redirigir al listado de productos después de la actualización
+            NavigationManager.NavigateTo("/productoformulario");
+        }
+    }
+
+    // Método para cancelar la edición
+    private void CancelarEdicion()
+    {
+        NavigationManager.NavigateTo("/productoformulario");
+    }
+}
