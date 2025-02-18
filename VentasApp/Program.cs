@@ -31,7 +31,6 @@ builder.Services.AddScoped<VentaService>();
 //builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 //builder.Services.AddTransient<IProductoService, ProductoService>();
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
